@@ -1,36 +1,54 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace LCM_Task3App.Controllers
+namespace Task3LCMApp.Controllers
 {
     [ApiController]
+    [Route("jahidunmuntaka25_gmail_com")] //
     public class LcmController : ControllerBase
     {
-        [HttpGet("{email}")]
-        public IActionResult GetLcm([FromRoute] string email, [FromQuery] long x, [FromQuery] long y)
+        [HttpGet]
+        public IActionResult GetLcm([FromQuery] string? x, [FromQuery] string? y)
         {
-            if (x <= 0 || y <= 0)
+            if (!long.TryParse(x, out long numberX) || !long.TryParse(y, out long numberY))
             {
-                return BadRequest(new { error = "Parameters x and y must be positive integers." });
+                return Content("NaN", "text/plain");
             }
 
-            long lcmValue = CalculateLCM(x, y);
-            return Ok(lcmValue);
-        }
-
-        private static long CalculateGCD(long a, long b)
-        {
-            while (b != 0)
+            if (numberX <= 0 || numberY <= 0)
             {
-                long temp = b;
-                b = a % b;
-                a = temp;
+                return Content("NaN", "text/plain");
             }
-            return a;
+
+            try
+            {
+                long lcm = CalculateLCM(numberX, numberY);
+                return Content(lcm.ToString(), "text/plain");
+            }
+            catch
+            {
+                return Content("NaN", "text/plain");
+            }
         }
 
-        private static long CalculateLCM(long a, long b)
+        private long CalculateGCD(long first, long second)
         {
-            return (a / CalculateGCD(a, b)) * b;
+            while (second != 0)
+            {
+                long remainder = first % second;
+                first = second;
+                second = remainder;
+            }
+            return first;
+        }
+
+     
+        private long CalculateLCM(long numberX, long numberY)
+        {
+            long gcd = CalculateGCD(numberX, numberY);
+            checked
+            {
+                return (numberX / gcd) * numberY;
+            }
         }
     }
 }
