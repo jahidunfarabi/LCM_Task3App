@@ -1,15 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Numerics;
 
 namespace Task3LCMApp.Controllers
 {
     [ApiController]
-    [Route("jahidunmuntaka25_gmail_com")] //
+    [Route("jahidunmuntaka25_gmail_com")]
     public class LcmController : ControllerBase
     {
         [HttpGet]
         public IActionResult GetLcm([FromQuery] string? x, [FromQuery] string? y)
         {
-            if (!long.TryParse(x, out long numberX) || !long.TryParse(y, out long numberY))
+            if (string.IsNullOrWhiteSpace(x) || string.IsNullOrWhiteSpace(y))
+            {
+                return Content("NaN", "text/plain");
+            }
+
+            if (!BigInteger.TryParse(x, out BigInteger numberX) || !BigInteger.TryParse(y, out BigInteger numberY))
             {
                 return Content("NaN", "text/plain");
             }
@@ -19,36 +25,10 @@ namespace Task3LCMApp.Controllers
                 return Content("NaN", "text/plain");
             }
 
-            try
-            {
-                long lcm = CalculateLCM(numberX, numberY);
-                return Content(lcm.ToString(), "text/plain");
-            }
-            catch
-            {
-                return Content("NaN", "text/plain");
-            }
-        }
+            BigInteger gcd = BigInteger.GreatestCommonDivisor(numberX, numberY);
+            BigInteger lcm = (numberX / gcd) * numberY;
 
-        private long CalculateGCD(long first, long second)
-        {
-            while (second != 0)
-            {
-                long remainder = first % second;
-                first = second;
-                second = remainder;
-            }
-            return first;
-        }
-
-     
-        private long CalculateLCM(long numberX, long numberY)
-        {
-            long gcd = CalculateGCD(numberX, numberY);
-            checked
-            {
-                return (numberX / gcd) * numberY;
-            }
+            return Content(lcm.ToString(), "text/plain");
         }
     }
 }
